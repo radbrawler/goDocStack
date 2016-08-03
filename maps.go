@@ -5,34 +5,43 @@ import (
 	"sync"
 )
 
-type GoMap map[int]string
+type MapIntString map[int]string
 
 type RWMap struct {
 	sync.RWMutex
-	rwm GoMap
+	rwm MapIntString
 }
 
 func main() {
-	var m GoMap
+	var m MapIntString
 
-	// Declare And Initialize
+	fmt.Println("\n==== Declare And Initialize ====")
 	m = declareAndInitialize()
 
-	// Counting map elements
+	fmt.Println("\n==== Counting map elements ====")
 	elementCount(m)
 
-	// Check for a element in a map
+	fmt.Println("\n==== Check for a element in a map ====")
 	key := 1 // should from declareAndInitialize()
 	findElement(m, key)
 
-	// Zero value of a map
+	fmt.Println("\n==== Zero value of a map ====")
 	zeroValue()
 
-	// Iterating elements over a map
+	fmt.Println("\n==== Iterating elements over a map ====")
 	iterateElements(m)
+
+	fmt.Println("\n==== Concurrent Access of maps ====")
+	concurrentAccess(m)
+
+	fmt.Println("\n==== Delete Map Element ====")
+	deleteMapElement(m, 4)
+
+	fmt.Println("\n==== Getting the Array of Keys and Values from a Map ====")
+	getKeyArray(m)
 }
 
-func declareAndInitialize() GoMap {
+func declareAndInitialize() MapIntString {
 	// var m1, m2 can't be used directly, they'll cause panic
 	// Keys are ints, values are ints
 	// var m1 map[int]int
@@ -46,28 +55,28 @@ func declareAndInitialize() GoMap {
 	return m
 }
 
-func elementCount(m GoMap) {
-	fmt.Println("length of map:", len(m))
+func elementCount(m MapIntString) {
+	fmt.Println(" length of map:", len(m))
 }
 
-func findElement(m GoMap, key int) {
-	fmt.Println("Finding Key ...")
+func findElement(m MapIntString, key int) {
+	fmt.Println(" Finding Key ...")
 	if val, err := m[key]; !err {
-		fmt.Println("key not found")
+		fmt.Println(" key not found")
 	} else {
-		fmt.Println("key value pair is ", key, ":", val)
+		fmt.Println(" key value pair is ", key, ":", val)
 	}
 }
 
 func zeroValue() {
 	var zeroMap map[int]string
-	fmt.Print("Zero map => ")
+	fmt.Print(" Zero map => ")
 	elementCount(zeroMap)
-	fmt.Println("Value of Expression (zeroMap == nil): ", zeroMap == nil)
+	fmt.Println(" Value of Expression (zeroMap == nil): ", zeroMap == nil)
 
-	var nonZero GoMap
-	nonZero = make(GoMap)
-	fmt.Print("Non Zero map => ")
+	var nonZero MapIntString
+	nonZero = make(MapIntString)
+	fmt.Print(" Non Zero map => ")
 	elementCount(nonZero)
 
 	// Writing to non zero map
@@ -75,31 +84,59 @@ func zeroValue() {
 	fmt.Println(nonZero[5])
 }
 
-func iterateElements(m GoMap) {
-	fmt.Print("Printing All Elements")
+func iterateElements(m MapIntString) {
+	fmt.Print(" Printing All Elements")
 	for key, val := range m {
-		fmt.Println("key: ", key, "value: ", val)
+		fmt.Println(" key: ", key, "value: ", val)
 	}
 }
 
-func concurrentAccess(m GoMap) {
+func concurrentAccess(m MapIntString) {
 	// Init
 	fmt.Println(" Initializing new map struct...")
-	counter := RWMap{rwm: make(GoMap)}
+	counter := RWMap{rwm: make(MapIntString)}
 	counter.rwm = m
 
 	// Get a read lock
 	fmt.Println(" Acquiring read lock...")
 	counter.RLock()
-	fmt.Println(" Accessing variable... \n value: ", counter.rwm[1])
+	fmt.Println(" Accessing variable... \t value: ", counter.rwm[1])
 	fmt.Println(" Releasing read lock...")
 	counter.RUnlock()
 
 	//Get write lock
 	fmt.Println(" Acquiring R/W lock...")
 	counter.Lock()
-	fmt.Println(" Changing map value...")
+	fmt.Print(" Changing map value... \t")
 	counter.rwm[1] = "a new hero"
+	fmt.Print("New Value: ", counter.rwm[1], "\n")
 	counter.Unlock()
+}
+
+func deleteMapElement(m MapIntString, key int) {
+	fmt.Println(" Deleting element {", key, ":", m[key], "} ... ")
+	delete(m, key)
+	fmt.Println(" Element deleted ")
+}
+
+func getKeyArray(m MapIntString) {
+	keys := make([]int, len(m))
+	i := 0
+	for key := range m {
+		keys[i] = key
+		i++
+	}
+	fmt.Print("\n Keys are: ", keys)
+
+	vals := make([]string, len(m))
+	i = 0
+	for _, val := range m {
+		vals[i] = val
+		i++
+	}
+	fmt.Print("\n Values are: ", vals)
+}
+
+func mapAsSet(m MapIntString) {
 
 }
